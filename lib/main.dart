@@ -10,11 +10,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Home Screen'),
+          title: Text('Chatter'),
         ),
         body: Center(
           child: Text(
-            'Welcome to Flutter!',
+            'Welcome Back!',
             style: TextStyle(fontSize: 24),
           ),
         ),
