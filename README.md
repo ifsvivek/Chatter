@@ -1,38 +1,26 @@
-# create-svelte
+# Chatter
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+Chatter is a real-time chat application built with SvelteKit and Neon Database. It allows users to post messages, reply to messages, and react to messages with emojis.
 
-## Creating a project
+## Live Demo
 
-If you're seeing this, you've probably already done this step. Congrats!
+Check out the live demo [here](https://chatter.ifsvivek.tech)
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## UI
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+![Chatter](./image.png)
+## Features
 
-## Developing
+- **Real-time Messaging**: Post and receive messages in real-time.
+- **Replies**: Reply to specific messages.
+- **Reactions**: React to messages with emojis.
+- **Dark Mode**: Supports dark mode for better user experience.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Technologies Used
 
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+- **Frontend**: SvelteKit
+- **Backend**: Neon Database
+- **Styling**: TailwindCSS
+- **Build Tool**: Vite
+- **Linting**: ESLint
+- **Formatting**: Prettier
