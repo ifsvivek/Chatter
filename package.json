@@ -28,6 +28,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@neondatabase/serverless": "^0.9.5",
 		"@vercel/postgres": "^0.10.0"
 	}
 }

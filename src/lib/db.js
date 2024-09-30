@@ -1,7 +1,5 @@
 // src/lib/db.js
-import { createPool } from '@vercel/postgres';
+import { neon } from '@neondatabase/serverless';
 import { POSTGRES_URL } from '$env/static/private';
 
-export const pool = createPool({
-    connectionString: POSTGRES_URL,
-});
+export const sql = neon(POSTGRES_URL);

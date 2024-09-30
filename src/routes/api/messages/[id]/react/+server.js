@@ -1,23 +1,20 @@
 // src/routes/api/messages/[id]/react/+server.js
-import { pool } from '$lib/db';
+import { sql } from '$lib/db';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ params, request }) {
     const { id } = params;
     const { emoji } = await request.json();
-    const client = await pool.connect();
     try {
-        const result = await client.query(`
+        const [updatedMessage] = await sql`
             UPDATE GlobalChat
-            SET reactions = COALESCE(reactions, '{}'::jsonb) || jsonb_build_object($1, COALESCE((reactions->$1)::int, 0) + 1)
-            WHERE id = $2
+            SET reactions = COALESCE(reactions, '{}'::jsonb) || jsonb_build_object(${emoji}::text, COALESCE((reactions->${emoji}::text)::int, 0) + 1)
+            WHERE id = ${id}::int
             RETURNING *
-        `, [emoji, id]);
-        return json(result.rows[0]);
+        `;
+        return json(updatedMessage);
     } catch (error) {
         console.error('Error adding reaction:', error);
         return json({ error: 'Failed to add reaction' }, { status: 500 });
-    } finally {
-        client.release();
     }
 }

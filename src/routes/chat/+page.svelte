@@ -33,7 +33,8 @@
 			messages = data.map((message) => ({
 				...message,
 				username:
-					typeof message.username === 'string' ? JSON.parse(message.username) : message.username
+					typeof message.username === 'string' ? JSON.parse(message.username) : message.username,
+				reactions: message.reactions || {}
 			}));
 		} catch (error) {
 			console.error('Error fetching messages:', error);
