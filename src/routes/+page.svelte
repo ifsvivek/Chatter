@@ -48,7 +48,7 @@
 	});
 </script>
 
-<main class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+<main class="min-h-screen bg-white dark:bg-black transition-colors duration-300">
 	<div class="container mx-auto p-4">
 		<div class="flex justify-between items-center mb-6">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-white">Choose Your Character</h1>

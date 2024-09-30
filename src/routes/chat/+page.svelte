@@ -9,6 +9,7 @@
 	let selectedCharacter;
 	let replyingTo = null;
 	let chatContainer;
+	let showReactions = null;
 
 	const emojis = ['👍', '❤️', '😂', '😮', '😢', '😡'];
 
@@ -20,6 +21,11 @@
 		} else {
 			document.documentElement.classList.remove('dark');
 		}
+	}
+
+	function logout() {
+		localStorage.removeItem('selectedCharacter');
+		goto('/');
 	}
 
 	onMount(async () => {
@@ -108,6 +114,23 @@
 		} catch (error) {
 			console.error('Error adding reaction:', error);
 		}
+		showReactions = null;
+	}
+
+	async function deleteMessage(messageId) {
+		try {
+			const response = await fetch(`/api/messages/${messageId}`, {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to delete message');
+			}
+
+			await fetchMessages();
+		} catch (error) {
+			console.error('Error deleting message:', error);
+		}
 	}
 
 	function setReplyTo(messageId) {
@@ -123,18 +146,30 @@
 			chatContainer.scrollTop = chatContainer.scrollHeight;
 		}
 	}
+
+	function toggleReactions(messageId) {
+		showReactions = showReactions === messageId ? null : messageId;
+	}
 </script>
 
-<main class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+<main class="min-h-screen bg-white dark:bg-black transition-colors duration-300">
 	<div class="container mx-auto p-4 flex flex-col h-screen">
 		<div class="flex justify-between items-center mb-6">
 			<h1 class="text-3xl font-bold text-gray-800 dark:text-white">Chatter</h1>
-			<button
-				on:click={toggleDarkMode}
-				class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
-			>
-				{$darkMode ? '☀️' : '🌙'}
-			</button>
+			<div class="flex items-center space-x-2">
+				<button
+					on:click={logout}
+					class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-300"
+				>
+					Logout
+				</button>
+				<button
+					on:click={toggleDarkMode}
+					class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+				>
+					{$darkMode ? '☀️' : '🌙'}
+				</button>
+			</div>
 		</div>
 		<div class="mb-4 text-gray-800 dark:text-white">
 			Logged in as: {selectedCharacter?.avatar}
@@ -142,31 +177,57 @@
 		</div>
 
 		<div
-			class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg flex-grow overflow-y-auto mb-4"
+			class="bg-gray-100 dark:bg-black p-4 rounded-lg flex-grow overflow-y-auto mb-4"
 			bind:this={chatContainer}
 		>
 			{#each messages as message (message.id)}
-				<div class="mb-4 p-2 bg-white dark:bg-gray-700 rounded shadow">
-					{#if message.username}
-						<div class="flex items-center mb-2">
-							<span class="text-2xl mr-2">{message.username.avatar}</span>
-							<span class="font-semibold text-gray-800 dark:text-white"
-								>{message.username.name}</span
+				<div class="mb-4 p-2 bg-white dark:bg-gray-700 rounded shadow relative">
+					<div class="flex justify-between items-start">
+						<div>
+							{#if message.username}
+								<div class="flex items-center mb-2">
+									<span class="text-2xl mr-2">{message.username.avatar}</span>
+									<span class="font-semibold text-gray-800 dark:text-white"
+										>{message.username.name}</span
+									>
+								</div>
+							{/if}
+							{#if message.replied_to}
+								<div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+									Replying to: {messages.find((m) => m.id === message.replied_to)?.message}
+								</div>
+							{/if}
+							<p class="text-gray-800 dark:text-white">{message.message}</p>
+						</div>
+						{#if message.username.name === selectedCharacter.name}
+							<button
+								on:click={() => deleteMessage(message.id)}
+								class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
 							>
-						</div>
-					{/if}
-					{#if message.replied_to}
-						<div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-							Replying to: {messages.find((m) => m.id === message.replied_to)?.message}
-						</div>
-					{/if}
-					<p class="text-gray-800 dark:text-white">{message.message}</p>
-					<div class="mt-2 flex items-center">
-						{#each emojis as emoji}
-							<button class="mr-2 text-sm" on:click={() => addReaction(message.id, emoji)}>
-								{emoji}
-								{message.reactions[emoji] || 0}
+								🗑️
 							</button>
+						{/if}
+					</div>
+					<div class="mt-2 flex items-center">
+						<button
+							class="text-sm text-gray-600 dark:text-gray-300 mr-2"
+							on:click={() => toggleReactions(message.id)}
+						>
+							Add Reaction
+						</button>
+						{#if showReactions === message.id}
+							<div
+								class="absolute bottom-full left-0 bg-white dark:bg-gray-600 p-2 rounded shadow-lg"
+							>
+								{#each emojis as emoji}
+									<button class="mr-2" on:click={() => addReaction(message.id, emoji)}>
+										{emoji}
+									</button>
+								{/each}
+							</div>
+						{/if}
+						{#each Object.entries(message.reactions) as [emoji, count]}
+							<span class="mr-2 text-sm">{emoji} {count}</span>
 						{/each}
 						<button
 							class="text-sm text-gray-600 dark:text-gray-300"
@@ -190,11 +251,11 @@
 				type="text"
 				bind:value={newMessage}
 				placeholder="Type your message..."
-				class="flex-grow p-2 border rounded-l bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600"
+				class="flex-grow p-2 border rounded-l bg-white dark:bg-black text-gray-800 dark:text-white border-gray-300 dark:border-gray-600"
 			/>
 			<button
 				type="submit"
-				class="p-2 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-800 rounded-r"
+				class="p-2 bg-black dark:bg-gray-200 text-white dark:text-gray-800 rounded-r"
 				>Send</button
 			>
 		</form>
