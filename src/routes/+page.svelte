@@ -2,6 +2,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { darkMode } from '$lib/stores';
 
 	let characters = [
 		{ id: 1, name: 'Wizard', avatar: '🧙‍♂️' },
@@ -21,25 +22,53 @@
 		goto('/chat');
 	}
 
+	function toggleDarkMode() {
+		darkMode.update((n) => !n);
+		localStorage.setItem('darkMode', JSON.stringify(!$darkMode));
+		if ($darkMode) {
+			document.documentElement.classList.add('dark');
+		} else {
+			document.documentElement.classList.remove('dark');
+		}
+	}
+
 	onMount(() => {
 		const storedCharacter = localStorage.getItem('selectedCharacter');
 		if (storedCharacter) {
 			goto('/chat');
 		}
+
+		const storedDarkMode = localStorage.getItem('darkMode');
+		if (storedDarkMode) {
+			darkMode.set(JSON.parse(storedDarkMode));
+		}
+		if ($darkMode) {
+			document.documentElement.classList.add('dark');
+		}
 	});
 </script>
 
-<main class="container mx-auto p-4">
-	<h1 class="text-3xl font-bold mb-6">Choose Your Character</h1>
-	<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-		{#each characters as character}
+<main class="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
+	<div class="container mx-auto p-4">
+		<div class="flex justify-between items-center mb-6">
+			<h1 class="text-3xl font-bold text-gray-800 dark:text-white">Choose Your Character</h1>
 			<button
-				class="p-4 bg-gray-100 rounded-lg shadow hover:shadow-md transition-shadow"
-				on:click={() => selectCharacter(character)}
+				on:click={toggleDarkMode}
+				class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
 			>
-				<div class="text-4xl mb-2">{character.avatar}</div>
-				<div class="font-semibold">{character.name}</div>
+				{$darkMode ? '☀️' : '🌙'}
 			</button>
-		{/each}
+		</div>
+		<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+			{#each characters as character}
+				<button
+					class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow text-gray-800 dark:text-white"
+					on:click={() => selectCharacter(character)}
+				>
+					<div class="text-4xl mb-2">{character.avatar}</div>
+					<div class="font-semibold">{character.name}</div>
+				</button>
+			{/each}
+		</div>
 	</div>
 </main>
