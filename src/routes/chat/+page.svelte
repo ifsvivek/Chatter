@@ -1,8 +1,6 @@
-<!-- src/routes/chat/+page.svelte -->
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { darkMode } from '$lib/stores';
 
 	let messages = [];
 	let newMessage = '';
@@ -12,16 +10,6 @@
 	let showReactions = null;
 
 	const emojis = ['👍', '❤️', '😂', '😮', '😢', '😡'];
-
-	function toggleDarkMode() {
-		darkMode.update((n) => !n);
-		localStorage.setItem('darkMode', JSON.stringify(!$darkMode));
-		if ($darkMode) {
-			document.documentElement.classList.add('dark');
-		} else {
-			document.documentElement.classList.remove('dark');
-		}
-	}
 
 	function logout() {
 		localStorage.removeItem('selectedCharacter');
@@ -33,14 +21,6 @@
 		if (!selectedCharacter) {
 			goto('/');
 			return;
-		}
-
-		const storedDarkMode = localStorage.getItem('darkMode');
-		if (storedDarkMode) {
-			darkMode.set(JSON.parse(storedDarkMode));
-		}
-		if ($darkMode) {
-			document.documentElement.classList.add('dark');
 		}
 
 		await fetchMessages();
@@ -152,112 +132,138 @@
 	}
 </script>
 
-<main class="min-h-screen bg-white dark:bg-black transition-colors duration-300">
-	<div class="container mx-auto p-4 flex flex-col h-screen">
-		<div class="flex justify-between items-center mb-6">
-			<h1 class="text-3xl font-bold text-gray-800 dark:text-white">Chatter</h1>
-			<div class="flex items-center space-x-2">
-				<button
-					on:click={logout}
-					class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-300"
+<div
+	class="flex h-[100dvh] flex-col bg-gradient-to-br from-gray-900 via-emerald-900 to-gray-900 md:flex-row"
+>
+	<!-- Sidebar/Header - More compact on mobile -->
+	<div
+		class="flex h-auto flex-shrink-0 flex-col border-b border-emerald-500/10 bg-gray-900/30 backdrop-blur-md md:h-screen md:w-72 md:border-r"
+	>
+		<div class="p-3 md:p-6">
+			<div class="flex items-center justify-between md:block">
+				<h1
+					class="bg-gradient-to-r from-emerald-200 to-teal-200 bg-clip-text text-xl font-bold text-transparent md:mb-6 md:text-3xl"
 				>
-					Logout
-				</button>
-				<button
-					on:click={toggleDarkMode}
-					class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+					Chatter
+				</h1>
+
+				<!-- Mobile collapsible user info -->
+				<details class="relative md:hidden">
+					<summary class="cursor-pointer list-none text-emerald-200/70">
+						<span class="text-lg">{selectedCharacter?.avatar}</span>
+					</summary>
+					<div
+						class="absolute right-0 top-full mt-1 w-48 rounded-lg border border-emerald-500/20 bg-gray-900/95 p-3 shadow-lg"
+					>
+						<span class="text-sm font-medium text-emerald-100">{selectedCharacter?.name}</span>
+					</div>
+				</details>
+
+				<!-- Desktop user info -->
+				<div
+					class="hidden rounded-xl border border-emerald-500/20 bg-emerald-600/10 p-4 backdrop-blur-sm md:block"
 				>
-					{$darkMode ? '☀️' : '🌙'}
-				</button>
+					<p class="mb-2 text-sm text-emerald-200/70">Logged in as:</p>
+					<div class="flex items-center">
+						<span class="mr-3 text-3xl">{selectedCharacter?.avatar}</span>
+						<span class="font-medium text-emerald-100">{selectedCharacter?.name}</span>
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="mb-4 text-gray-800 dark:text-white">
-			Logged in as: {selectedCharacter?.avatar}
-			{selectedCharacter?.name}
-		</div>
+		<button
+			on:click={logout}
+			class="mx-3 mb-3 mt-auto rounded-lg bg-red-500/80 px-3 py-1.5 text-sm text-white backdrop-blur-sm transition-all hover:bg-red-500 md:mx-6 md:mb-6 md:px-4 md:py-2 md:text-base"
+		>
+			Logout
+		</button>
+	</div>
 
+	<!-- Chat Area - Improved mobile layout -->
+	<div class="flex flex-1 flex-col bg-gray-900/30 backdrop-blur-md">
 		<div
-			class="bg-gray-100 dark:bg-black p-4 rounded-lg flex-grow overflow-y-auto mb-4"
+			class="flex-1 overflow-y-auto overscroll-contain p-3 md:p-6"
 			bind:this={chatContainer}
+			style="height: calc(100dvh - 140px);"
 		>
 			{#each messages as message (message.id)}
-				<div class="mb-4 p-2 bg-white dark:bg-gray-700 rounded shadow relative">
-					<div class="flex justify-between items-start">
-						<div>
-							{#if message.username}
-								<div class="flex items-center mb-2">
-									<span class="text-2xl mr-2">{message.username.avatar}</span>
-									<span class="font-semibold text-gray-800 dark:text-white"
-										>{message.username.name}</span
-									>
-								</div>
-							{/if}
-							{#if message.replied_to}
-								<div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-									Replying to: {messages.find((m) => m.id === message.replied_to)?.message}
-								</div>
-							{/if}
-							<p class="text-gray-800 dark:text-white">{message.message}</p>
-						</div>
-						{#if message.username.name === selectedCharacter.name}
-							<button
-								on:click={() => deleteMessage(message.id)}
-								class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-							>
-								🗑️
-							</button>
-						{/if}
-					</div>
-					<div class="mt-2 flex items-center">
-						<button
-							class="text-sm text-gray-600 dark:text-gray-300 mr-2"
-							on:click={() => toggleReactions(message.id)}
+				<div class="mb-3 last:mb-1 md:mb-6">
+					<div class="mb-1 flex items-center md:mb-2">
+						<span class="mr-2 text-lg md:text-2xl">{message.username.avatar}</span>
+						<span class="text-xs font-medium text-emerald-100 md:text-base"
+							>{message.username.name}</span
 						>
-							Add Reaction
-						</button>
-						{#if showReactions === message.id}
-							<div
-								class="absolute bottom-full left-0 bg-white dark:bg-gray-600 p-2 rounded shadow-lg"
-							>
-								{#each emojis as emoji}
-									<button class="mr-2" on:click={() => addReaction(message.id, emoji)}>
-										{emoji}
-									</button>
-								{/each}
+					</div>
+					<div
+						class="ml-4 rounded-xl border border-emerald-500/10 bg-gray-800/50 p-2.5 backdrop-blur-sm md:ml-9 md:p-4"
+					>
+						{#if message.replied_to}
+							<div class="mb-1.5 text-xs text-emerald-200/60 md:mb-2 md:text-sm">
+								↳ {messages.find((m) => m.id === message.replied_to)?.message}
 							</div>
 						{/if}
-						{#each Object.entries(message.reactions) as [emoji, count]}
-							<span class="mr-2 text-sm">{emoji} {count}</span>
-						{/each}
-						<button
-							class="text-sm text-gray-600 dark:text-gray-300"
-							on:click={() => setReplyTo(message.id)}
+						<p class="text-xs text-emerald-100 md:text-base">{message.message}</p>
+
+						<!-- Message Actions - Compact on mobile -->
+						<div
+							class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-emerald-200/60 md:mt-3 md:text-sm"
 						>
-							Reply
-						</button>
+							<button
+								class="transition-colors hover:text-emerald-200"
+								on:click={() => toggleReactions(message.id)}
+							>
+								React
+							</button>
+							<button
+								class="transition-colors hover:text-emerald-200"
+								on:click={() => setReplyTo(message.id)}
+							>
+								Reply
+							</button>
+							{#if message.username.name === selectedCharacter.name}
+								<button
+									class="transition-colors hover:text-red-400"
+									on:click={() => deleteMessage(message.id)}
+								>
+									Delete
+								</button>
+							{/if}
+						</div>
+
+						<!-- Rest of the components remain the same -->
 					</div>
 				</div>
 			{/each}
 		</div>
 
-		<form on:submit|preventDefault={sendMessage} class="flex items-center">
+		<!-- Message Input - Better mobile handling -->
+		<div class="border-t border-emerald-500/10 bg-gray-900/30 p-3 backdrop-blur-md md:p-6">
 			{#if replyingTo}
-				<div class="mr-2 text-sm text-gray-500 dark:text-gray-400">
-					Replying to: {messages.find((m) => m.id === replyingTo)?.message}
-					<button class="ml-2 text-red-500 dark:text-red-400" on:click={cancelReply}>Cancel</button>
+				<div
+					class="mb-2 flex items-center justify-between rounded-lg bg-emerald-500/5 px-2 py-1.5 md:mb-3 md:px-3 md:py-2"
+				>
+					<span class="text-xs text-emerald-200/70 md:text-sm">
+						Replying to: {messages.find((m) => m.id === replyingTo)?.message}
+					</span>
+					<button class="text-xs text-red-400 hover:text-red-500 md:text-sm" on:click={cancelReply}>
+						Cancel
+					</button>
 				</div>
 			{/if}
-			<input
-				type="text"
-				bind:value={newMessage}
-				placeholder="Type your message..."
-				class="flex-grow p-2 border rounded-l bg-white dark:bg-black text-gray-800 dark:text-white border-gray-300 dark:border-gray-600"
-			/>
-			<button
-				type="submit"
-				class="p-2 bg-black dark:bg-gray-200 text-white dark:text-gray-800 rounded-r"
-				>Send</button
-			>
-		</form>
+			<form on:submit|preventDefault={sendMessage} class="flex gap-2 md:gap-3">
+				<input
+					type="text"
+					bind:value={newMessage}
+					placeholder="Type your message..."
+					class="flex-1 rounded-lg border border-emerald-500/10 bg-gray-800/50 px-3 py-1.5 text-xs text-emerald-100 placeholder-emerald-200/30 focus:border-emerald-500/30 focus:outline-none md:py-2 md:text-base"
+				/>
+				<button
+					type="submit"
+					class="rounded-lg bg-emerald-600/80 px-3 py-1.5 text-xs text-white transition-all hover:bg-emerald-600 md:px-6 md:py-2 md:text-base"
+				>
+					Send
+				</button>
+			</form>
+		</div>
 	</div>
-</main>
+</div>

@@ -9,18 +9,49 @@ Check out the live demo [here](https://chatter.ifsvivek.tech)
 ## UI
 
 ![Chatter](./image.png)
+
 ## Features
 
-- **Real-time Messaging**: Post and receive messages in real-time.
-- **Replies**: Reply to specific messages.
-- **Reactions**: React to messages with emojis.
-- **Dark Mode**: Supports dark mode for better user experience.
+- **Character Selection**: Choose from unique character avatars to represent yourself
+- **Real-time Messaging**: Post and receive messages in real-time
+- **Message Interactions**:
+  - Reply to specific messages
+  - React with emoji reactions
+  - Delete your own messages
+- **Modern UI**: Sleek design with animated backgrounds and transitions
+- **Responsive**: Works seamlessly on mobile and desktop
 
 ## Technologies Used
 
-- **Frontend**: SvelteKit
-- **Backend**: Neon Database
-- **Styling**: TailwindCSS
-- **Build Tool**: Vite
-- **Linting**: ESLint
-- **Formatting**: Prettier
+- **Frontend**:
+  - SvelteKit 5.0
+  - TailwindCSS for styling
+  - Svelte transitions and animations
+- **Backend**:
+  - Neon PostgreSQL Database
+  - [@neondatabase/serverless](https://www.npmjs.com/package/@neondatabase/serverless) for database connectivity
+- **Development**:
+  - Vite for build tooling
+  - Prettier for code formatting
+  - ESLint for linting
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Create a `.env` file with your Neon database URL:
+
+```
+POSTGRES_URL="your-neon-database-url"
+```
+
+4. Start the development server:
+
+```bash
+npm run dev
+```
