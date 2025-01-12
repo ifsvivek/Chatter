@@ -160,6 +160,7 @@
 					</details>
 					<button
 						on:click={logout}
+						aria-label="Logout"
 						class="rounded-full bg-red-500/80 p-2 text-white hover:bg-red-500 md:hidden"
 					>
 						<svg
